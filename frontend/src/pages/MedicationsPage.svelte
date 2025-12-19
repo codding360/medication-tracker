@@ -76,6 +76,10 @@
     }
   }
 
+  function triggerFileUpload() {
+    document.getElementById('image').click()
+  }
+
   async function handleSubmit() {
     try {
       if (!formData.image_url) {
@@ -229,7 +233,12 @@
         <div class="input-group">
           <label for="image">Изображение * {uploading ? '(Загрузка...)' : ''}</label>
           <div class="file-input-wrapper">
-            <button type="button" class="btn btn-secondary" disabled={uploading}>
+            <button 
+              type="button" 
+              class="btn btn-secondary" 
+              disabled={uploading}
+              onclick={triggerFileUpload}
+            >
               {formData.image_url ? 'Изменить изображение' : 'Выбрать изображение'}
             </button>
             <input 
@@ -238,6 +247,7 @@
               accept="image/*"
               onchange={handleFileUpload}
               disabled={uploading}
+              style="display: none;"
             />
           </div>
           {#if formData.image_url}
