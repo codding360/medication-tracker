@@ -9,7 +9,9 @@
     "dev:backend": "node --watch app.js",
     "dev:frontend": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "build:all": "vite build",
+    "preview": "vite preview",
+    "start": "node app.js"
   },
   "keywords": [],
   "author": "",

@@ -1,6 +1,7 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import multipart from '@fastify/multipart'
+import fastifyStatic from '@fastify/static'
 import { createClient } from '@supabase/supabase-js'
 import * as dotenv from 'dotenv'
 import path from 'path'
@@ -15,6 +16,8 @@ let cronJobs = null
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+
+const isProduction = process.env.NODE_ENV === 'production'
 
 const fastify = Fastify({
   logger: true
@@ -36,6 +39,16 @@ await fastify.register(multipart, {
     fileSize: 5 * 1024 * 1024 // 5MB
   }
 })
+
+// Serve static files in production
+if (isProduction) {
+  await fastify.register(fastifyStatic, {
+    root: path.join(__dirname, 'dist'),
+    prefix: '/'
+  })
+  
+  console.log('📦 Serving static files from dist/')
+}
 
 // Make supabase available in routes
 fastify.decorate('supabase', supabase)
