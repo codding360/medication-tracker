@@ -1,0 +1,40 @@
+====================================
+QUICK START GUIDE
+====================================
+
+1. Install dependencies:
+   npm install
+
+2. Create .env file with your Supabase credentials:
+   
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_ANON_KEY=your_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   PORT=3000
+   HOST=0.0.0.0
+   VITE_API_URL=http://localhost:3000
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your_anon_key
+
+3. Setup Supabase:
+   - Run supabase/migrations/001_initial_schema.sql in SQL Editor
+   - Run supabase/storage-setup.sql in SQL Editor
+
+4. Start the application:
+   npm run dev
+
+5. Open http://localhost:5173
+
+====================================
+WORKFLOW
+====================================
+
+1. Create a user (Users page)
+2. Select the user as active
+3. Add medications with images (Medications page)
+4. Create schedules for medications (Schedules page)
+5. Optionally add cycles (Cycles page)
+6. Preview reminders (Preview page)
+
+====================================
+

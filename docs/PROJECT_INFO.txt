@@ -1,0 +1,103 @@
+====================================
+MEDICATION TRACKER
+====================================
+
+Full-stack web application for managing medication reminders
+
+====================================
+TECHNOLOGY STACK
+====================================
+
+Frontend:
+- Svelte 5.0
+- Vite 6.0
+- Native CSS (no frameworks)
+
+Backend:
+- Fastify 5.0 (Node.js)
+- ES Modules
+
+Database & Storage:
+- Supabase (PostgreSQL)
+- Supabase Storage (for images)
+
+====================================
+KEY FEATURES
+====================================
+
+✓ User Management
+  - Create, edit, delete users
+  - WhatsApp number (E.164 format)
+  - Timezone support
+  - Select active user
+
+✓ Medication Management
+  - CRUD operations
+  - Image upload (required)
+  - Dose information
+  - Active/inactive status
+
+✓ Schedule Management
+  - Multiple times per medication
+  - 24-hour format (HH:mm)
+  - Grouped by time display
+
+✓ Medication Cycles
+  - Take/rest periods
+  - Start date
+  - Enable/disable
+  - Status calculation (taking/resting)
+
+✓ Reminder Preview
+  - Select any time
+  - Shows up to 5 medications
+  - Respects cycles
+  - Only active medications
+  - User timezone
+
+====================================
+ARCHITECTURE
+====================================
+
+Structure: Monorepo
+- Backend serves REST API
+- Frontend served by Vite dev server
+- Backend and frontend run concurrently
+
+No Authentication:
+- Open UI (as per requirements)
+- No login/registration
+- Public API endpoints
+
+====================================
+API DESIGN
+====================================
+
+RESTful endpoints:
+- /api/users
+- /api/medications  
+- /api/schedules
+- /api/cycles
+- /api/preview
+
+All responses: JSON
+File uploads: multipart/form-data
+CORS: Enabled
+
+====================================
+DEPLOYMENT CONSIDERATIONS
+====================================
+
+Environment Variables:
+- Backend needs SUPABASE_SERVICE_ROLE_KEY
+- Frontend needs SUPABASE_ANON_KEY
+- Separate URLs for API and Supabase
+
+Production:
+- Build frontend: npm run build
+- Serve dist folder
+- Backend on separate port/domain
+- Configure VITE_API_URL for production
+
+====================================
+

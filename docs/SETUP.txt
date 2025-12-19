@@ -1,0 +1,195 @@
+==============================================
+MEDICATION TRACKER - SETUP GUIDE
+==============================================
+
+Tech Stack:
+- Backend: Fastify (Node.js)
+- Frontend: Svelte + Vite
+- Database: Supabase (PostgreSQL)
+- Storage: Supabase Storage (for medication images)
+
+==============================================
+1. SUPABASE SETUP
+==============================================
+
+1. Create a new Supabase project at https://supabase.com
+
+2. Run the database migration:
+   - Go to SQL Editor in Supabase Dashboard
+   - Copy and run the content of: supabase/migrations/001_initial_schema.sql
+
+3. Setup Storage:
+   - Go to Storage in Supabase Dashboard
+   - Run the SQL from: supabase/storage-setup.sql
+   OR
+   - Create a bucket named 'medication-images'
+   - Make it public
+   - Set policies to allow all operations
+
+4. Get your credentials:
+   - Go to Project Settings > API
+   - Copy: Project URL, anon/public key, service_role key
+
+==============================================
+2. ENVIRONMENT SETUP
+==============================================
+
+Create a .env file in the root directory:
+
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+
+PORT=3000
+HOST=0.0.0.0
+
+VITE_API_URL=http://localhost:3000
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key_here
+
+==============================================
+3. INSTALLATION
+==============================================
+
+npm install
+
+==============================================
+4. RUNNING THE APPLICATION
+==============================================
+
+Development (runs both frontend and backend):
+npm run dev
+
+Backend only:
+npm run dev:backend
+
+Frontend only:
+npm run dev:frontend
+
+Production build:
+npm run build
+npm start
+
+==============================================
+5. ACCESSING THE APPLICATION
+==============================================
+
+Frontend: http://localhost:5173
+Backend API: http://localhost:3000
+Health Check: http://localhost:3000/api/health
+
+==============================================
+6. API ENDPOINTS
+==============================================
+
+Users:
+  GET    /api/users
+  GET    /api/users/:id
+  POST   /api/users
+  PUT    /api/users/:id
+  DELETE /api/users/:id
+
+Medications:
+  GET    /api/medications/user/:userId
+  GET    /api/medications/:id
+  POST   /api/medications
+  PUT    /api/medications/:id
+  DELETE /api/medications/:id
+  POST   /api/medications/upload (multipart/form-data)
+
+Schedules:
+  GET    /api/schedules/medication/:medicationId
+  GET    /api/schedules/user/:userId
+  GET    /api/schedules/:id
+  POST   /api/schedules
+  PUT    /api/schedules/:id
+  DELETE /api/schedules/:id
+
+Cycles:
+  GET    /api/cycles/medication/:medicationId
+  GET    /api/cycles/user/:userId
+  GET    /api/cycles/:id
+  POST   /api/cycles
+  PUT    /api/cycles/:id
+  DELETE /api/cycles/:id
+
+Preview:
+  GET    /api/preview/:userId?time=HH:mm
+
+==============================================
+7. PROJECT STRUCTURE
+==============================================
+
+/
+├── app.js                  # Fastify server entry point
+├── package.json           
+├── vite.config.js         # Vite configuration
+├── svelte.config.js       # Svelte configuration
+├── routes/                # Backend API routes
+│   ├── users.js
+│   ├── medications.js
+│   ├── schedules.js
+│   ├── cycles.js
+│   └── preview.js
+├── supabase/             # Database migrations
+│   ├── migrations/
+│   └── storage-setup.sql
+└── frontend/             # Svelte frontend
+    ├── index.html
+    └── src/
+        ├── main.js
+        ├── App.svelte
+        ├── app.css
+        ├── lib/
+        │   ├── api.js       # API client
+        │   └── stores.js    # Svelte stores
+        └── pages/
+            ├── UsersPage.svelte
+            ├── MedicationsPage.svelte
+            ├── SchedulesPage.svelte
+            ├── CyclesPage.svelte
+            └── PreviewPage.svelte
+
+==============================================
+8. FEATURES
+==============================================
+
+✓ User Management (CRUD)
+✓ Medication Management (CRUD with image upload)
+✓ Schedule Management (multiple times per medication)
+✓ Cycle Management (take/rest periods)
+✓ Preview Reminders (with cycle calculation)
+✓ No authentication required (open UI)
+✓ Modern, clean interface
+✓ Responsive design
+
+==============================================
+9. TROUBLESHOOTING
+==============================================
+
+Issue: Cannot connect to Supabase
+Solution: Check .env file, verify SUPABASE_URL and keys
+
+Issue: Image upload fails
+Solution: Check storage bucket is created and public
+
+Issue: Port already in use
+Solution: Change PORT in .env file
+
+Issue: CORS errors
+Solution: Backend has CORS enabled, check API_URL in frontend
+
+==============================================
+10. NOTES
+==============================================
+
+- No authentication/authorization (as per requirements)
+- All endpoints are public
+- Images stored in Supabase Storage
+- Time format: 24-hour (HH:mm)
+- WhatsApp format: E.164 (+[country][number])
+- Max 5 medications per preview
+- Medication image is required
+
+==============================================
+
