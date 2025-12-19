@@ -4,7 +4,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import { sendWhatsAppMessage, formatMedicationReminder } from './notifications.js'
+import { sendWhatsAppMessage, sendWhatsAppImage, formatMedicationCaption, logNotification } from './notifications.js'
 import { DateTime } from 'luxon'
 import * as dotenv from 'dotenv'
 
@@ -173,31 +173,78 @@ async function processUserReminders(userId, schedules, time) {
     
     console.log(`${medicationsToRemind.length} medication(s) to remind`)
     
-    // Format message
-    const message = formatMedicationReminder(user, medicationsToRemind, time)
+    let successCount = 0
+    let failCount = 0
     
-    // Send WhatsApp notification
-    const result = await sendWhatsAppMessage(
-      user.whatsapp_number,
-      message,
-      {
-        userId: user.id,
-        userName: user.name,
-        time: time,
-        medicationCount: medicationsToRemind.length,
-        medications: medicationsToRemind.map(m => ({
-          id: m.id,
-          name: m.name,
-          dose: m.dose
-        }))
+    // Send each medication with image
+    for (let i = 0; i < medicationsToRemind.length; i++) {
+      const med = medicationsToRemind[i]
+      
+      // Небольшая задержка между сообщениями (чтобы они шли по порядку)
+      if (i > 0) {
+        await new Promise(resolve => setTimeout(resolve, 1500))
       }
-    )
-    
-    if (result.success) {
-      console.log(`✓ Reminder sent to ${user.name}`)
-    } else {
-      console.error(`✗ Failed to send reminder to ${user.name}:`, result.error)
+      
+      if (med.image_url) {
+        console.log(`   📸 Sending image ${i + 1}/${medicationsToRemind.length}: ${med.name}...`)
+        
+        const caption = formatMedicationCaption(med, time)
+        
+        const imageResult = await sendWhatsAppImage(
+          user.whatsapp_number,
+          med.image_url,
+          caption
+        )
+        
+        if (imageResult.success) {
+          successCount++
+          
+          // Log to database
+          await logNotification({
+            user_id: user.id,
+            channel: 'whatsapp',
+            recipient: user.whatsapp_number,
+            message: caption,
+            status: 'sent',
+            metadata: {
+              medicationId: med.id,
+              medicationName: med.name,
+              time: time,
+              hasImage: true,
+              imageUrl: med.image_url
+            }
+          })
+        } else {
+          failCount++
+          console.error(`   ✗ Failed to send image for ${med.name}`)
+        }
+      } else {
+        // Если нет изображения, отправляем текстовое сообщение
+        console.log(`   💬 Sending text ${i + 1}/${medicationsToRemind.length}: ${med.name}...`)
+        
+        const medMessage = formatMedicationCaption(med, time)
+        
+        const textResult = await sendWhatsAppMessage(
+          user.whatsapp_number,
+          medMessage,
+          {
+            userId: user.id,
+            medicationId: med.id,
+            medicationName: med.name,
+            time: time,
+            hasImage: false
+          }
+        )
+        
+        if (textResult.success) {
+          successCount++
+        } else {
+          failCount++
+        }
+      }
     }
+    
+    console.log(`✓ Reminder complete for ${user.name}: ${successCount} sent, ${failCount} failed`)
     
   } catch (error) {
     console.error(`Error processing user ${userId}:`, error)

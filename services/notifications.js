@@ -24,6 +24,64 @@ function phoneNumberToChatId(phoneNumber) {
 }
 
 /**
+ * Send WhatsApp image with caption via Green-API
+ * 
+ * @param {string} phoneNumber - WhatsApp number in E.164 format
+ * @param {string} imageUrl - URL изображения
+ * @param {string} caption - Подпись к изображению
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+export async function sendWhatsAppImage(phoneNumber, imageUrl, caption = '') {
+  try {
+    const apiUrl = process.env.GREEN_API_URL
+    const idInstance = process.env.GREEN_API_ID_INSTANCE
+    const apiToken = process.env.GREEN_API_TOKEN_INSTANCE
+    
+    if (!apiUrl || !idInstance || !apiToken) {
+      console.log('⚠️  Green-API not configured. Image not sent.')
+      return { success: false, error: 'Green-API not configured' }
+    }
+    
+    const chatId = phoneNumberToChatId(phoneNumber)
+    const url = `${apiUrl}/waInstance${idInstance}/sendFileByUrl/${apiToken}`
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        chatId: chatId,
+        urlFile: imageUrl,
+        fileName: 'medication.jpg',
+        caption: caption
+      })
+    })
+    
+    const responseData = await response.json()
+    
+    if (!response.ok) {
+      throw new Error(`Green-API error: ${JSON.stringify(responseData)}`)
+    }
+    
+    console.log(`   ✓ Image sent: ${imageUrl.substring(0, 50)}...`)
+    
+    return {
+      success: true,
+      messageId: responseData.idMessage || null,
+      response: responseData
+    }
+    
+  } catch (error) {
+    console.error(`   ✗ Error sending image: ${error.message}`)
+    return {
+      success: false,
+      error: error.message
+    }
+  }
+}
+
+/**
  * Send WhatsApp notification to user via Green-API
  * 
  * @param {string} phoneNumber - WhatsApp number in E.164 format (+996700112233)
@@ -139,41 +197,36 @@ export async function sendWhatsAppMessage(phoneNumber, message, metadata = {}) {
 }
 
 /**
- * Format medication reminder message for WhatsApp
+ * Format medication caption for WhatsApp image
  */
-export function formatMedicationReminder(user, medications, time) {
-  const emoji = '💊'
+export function formatMedicationCaption(med, time) {
   const lines = []
   
-  lines.push(`${emoji} *Напоминание о приёме лекарств*`)
+  lines.push(`💊 *${med.name}*`)
   lines.push('')
-  lines.push(`⏰ Время: *${time}*`)
-  lines.push(`👤 Пациент: ${user.name}`)
-  lines.push('')
-  lines.push('📋 *Лекарства к приёму:*')
+  lines.push(`⏰ Время приёма: *${time}*`)
   lines.push('')
   
-  medications.forEach((med, index) => {
-    lines.push(`${index + 1}. *${med.name}*`)
-    
-    // Используем quantity если есть, иначе dose
-    const dosage = med.quantity || med.dose
-    lines.push(`   Доза: ${dosage}`)
-    
-    if (med.cycleStatus) {
-      if (med.cycleStatus.phase === 'taking') {
-        lines.push(`   🔄 День ${med.cycleStatus.dayInCycle} из ${med.cycleStatus.totalTakeDays} (приём)`)
-      } else if (med.cycleStatus.phase === 'resting') {
-        lines.push(`   ⏸ День ${med.cycleStatus.dayInCycle} из ${med.cycleStatus.totalRestDays} (перерыв)`)
-      }
+  // Используем quantity если есть, иначе dose
+  const dosage = med.quantity || med.dose
+  lines.push(`📋 Доза: ${dosage}`)
+  
+  if (med.cycleStatus) {
+    if (med.cycleStatus.phase === 'taking') {
+      lines.push('')
+      lines.push(`🔄 День ${med.cycleStatus.dayInCycle} из ${med.cycleStatus.totalTakeDays} (приём)`)
+      lines.push(`✅ Сегодня принимать`)
+    } else if (med.cycleStatus.phase === 'resting') {
+      lines.push('')
+      lines.push(`⏸ День ${med.cycleStatus.dayInCycle} из ${med.cycleStatus.totalRestDays} (перерыв)`)
     }
-    
+  } else {
     lines.push('')
-  })
+    lines.push(`📅 Принимать ежедневно`)
+  }
   
-  lines.push('_Не забудьте принять лекарства вовремя!_')
   lines.push('')
-  lines.push(`🕐 Отправлено: ${new Date().toLocaleString('ru-RU')}`)
+  lines.push(`_Не забудьте принять лекарство вовремя!_`)
   
   return lines.join('\n')
 }
@@ -181,7 +234,7 @@ export function formatMedicationReminder(user, medications, time) {
 /**
  * Log notification to database
  */
-async function logNotification(data) {
+export async function logNotification(data) {
   try {
     const { error } = await supabase
       .from('notifications_log')
