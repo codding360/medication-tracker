@@ -59,6 +59,11 @@ export default async function (fastify, opts) {
       // Build complete instructions
       const instructions = medications.map(med => {
         const medSchedules = schedules.filter(s => s.medication_id === med.id)
+          .map(s => ({
+            id: s.id,
+            time: s.time,
+            quantity: s.quantity
+          }))
         const medCycle = cycles.find(c => c.medication_id === med.id)
 
         // Calculate cycle status
@@ -104,10 +109,7 @@ export default async function (fastify, opts) {
           name: med.name,
           dose: med.dose,
           image_url: med.image_url,
-          schedules: medSchedules.map(s => ({
-            id: s.id,
-            time: s.time
-          })),
+          schedules: medSchedules,
           cycle: medCycle ? {
             id: medCycle.id,
             enabled: medCycle.enabled,

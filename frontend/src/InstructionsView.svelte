@@ -142,7 +142,12 @@
                     <div class="instruction-label">⏰ Расписание приёма:</div>
                     <div class="schedule-times">
                       {#each med.schedules as schedule}
-                        <span class="time-badge">{schedule.time}</span>
+                        <div class="time-item">
+                          <span class="time-badge">{schedule.time}</span>
+                          {#if schedule.quantity}
+                            <span class="quantity-badge">{schedule.quantity}</span>
+                          {/if}
+                        </div>
                       {/each}
                     </div>
                   </div>
@@ -348,6 +353,19 @@
     gap: 0.75rem;
   }
 
+  .schedule-times {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .time-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
   .time-badge {
     display: inline-block;
     padding: 0.5rem 1rem;
@@ -356,6 +374,16 @@
     border-radius: 0.5rem;
     font-size: 1.125rem;
     font-weight: 600;
+  }
+
+  .quantity-badge {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    background: var(--success);
+    color: white;
+    border-radius: 0.375rem;
+    font-size: 0.95rem;
+    font-weight: 500;
   }
 
   .cycle-info-detailed {

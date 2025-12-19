@@ -1,12 +1,16 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_URL = import.meta.env.VITE_API_URL || ''
 
 async function request(endpoint, options = {}) {
+  const headers = { ...options.headers }
+  
+  // Добавляем Content-Type только если есть body
+  if (options.body) {
+    headers['Content-Type'] = 'application/json'
+  }
+  
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers
-    }
+    headers
   })
 
   if (!response.ok) {

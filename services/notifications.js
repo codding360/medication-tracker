@@ -155,7 +155,10 @@ export function formatMedicationReminder(user, medications, time) {
   
   medications.forEach((med, index) => {
     lines.push(`${index + 1}. *${med.name}*`)
-    lines.push(`   Доза: ${med.dose}`)
+    
+    // Используем quantity если есть, иначе dose
+    const dosage = med.quantity || med.dose
+    lines.push(`   Доза: ${dosage}`)
     
     if (med.cycleStatus) {
       if (med.cycleStatus.phase === 'taking') {

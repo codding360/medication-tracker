@@ -154,6 +154,7 @@ async function processUserReminders(userId, schedules, time) {
       if (shouldRemind) {
         medicationsToRemind.push({
           ...medication,
+          quantity: schedule.quantity, // Добавляем quantity из расписания
           cycleStatus
         })
       }

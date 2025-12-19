@@ -12,7 +12,8 @@
 
   let formData = {
     medication_id: '',
-    time: ''
+    time: '',
+    quantity: ''
   }
 
   onMount(() => {
@@ -46,7 +47,8 @@
     editingSchedule = null
     formData = {
       medication_id: medications[0]?.id || '',
-      time: '08:00'
+      time: '08:00',
+      quantity: ''
     }
     showModal = true
   }
@@ -55,7 +57,8 @@
     editingSchedule = schedule
     formData = {
       medication_id: schedule.medication_id,
-      time: schedule.time
+      time: schedule.time,
+      quantity: schedule.quantity || ''
     }
     showModal = true
   }
@@ -63,7 +66,10 @@
   async function handleSubmit() {
     try {
       if (editingSchedule) {
-        await schedulesApi.update(editingSchedule.id, { time: formData.time })
+        await schedulesApi.update(editingSchedule.id, { 
+          time: formData.time,
+          quantity: formData.quantity 
+        })
       } else {
         await schedulesApi.create(formData)
       }
@@ -144,7 +150,14 @@
                   {schedule.medications?.name || getMedicationName(schedule.medication_id)}
                 </div>
                 <div style="color: var(--text-light); font-size: 0.875rem;">
-                  {schedule.medications?.dose || ''}
+                  {#if schedule.quantity}
+                    <strong style="color: var(--primary);">{schedule.quantity}</strong>
+                    {#if schedule.medications?.dose}
+                      <span style="color: var(--text-light);"> • {schedule.medications?.dose}</span>
+                    {/if}
+                  {:else}
+                    {schedule.medications?.dose || ''}
+                  {/if}
                 </div>
               </div>
               <div class="list-item-actions">
@@ -202,6 +215,19 @@
             bind:value={formData.time} 
             required 
           />
+        </div>
+
+        <div class="input-group">
+          <label for="quantity">Количество (опционально)</label>
+          <input 
+            id="quantity"
+            type="text" 
+            bind:value={formData.quantity} 
+            placeholder="например, 1 таблетка, 2 капсулы, 5 капель"
+          />
+          <small style="color: var(--text-light);">
+            Если не указано, будет использоваться дозировка из лекарства
+          </small>
         </div>
 
         <div class="modal-footer">

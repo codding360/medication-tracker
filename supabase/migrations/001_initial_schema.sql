@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS schedules (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   medication_id UUID NOT NULL REFERENCES medications(id) ON DELETE CASCADE,
   time TEXT NOT NULL, -- Format: HH:mm
+  quantity TEXT, -- How much to take (e.g., "1 таблетка", "2 капсулы", "5 капель")
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

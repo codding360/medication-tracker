@@ -68,7 +68,7 @@ export default async function (fastify, opts) {
 
   // Create schedule
   fastify.post('/', async (request, reply) => {
-    const { medication_id, time } = request.body
+    const { medication_id, time, quantity } = request.body
 
     if (!medication_id || !time) {
       reply.code(400).send({ error: 'Missing required fields: medication_id, time' })
@@ -84,7 +84,7 @@ export default async function (fastify, opts) {
 
     const { data, error } = await supabase
       .from('schedules')
-      .insert([{ medication_id, time }])
+      .insert([{ medication_id, time, quantity }])
       .select()
       .single()
 
@@ -99,7 +99,7 @@ export default async function (fastify, opts) {
   // Update schedule
   fastify.put('/:id', async (request, reply) => {
     const { id } = request.params
-    const { time } = request.body
+    const { time, quantity } = request.body
 
     if (time !== undefined) {
       const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/
@@ -109,9 +109,13 @@ export default async function (fastify, opts) {
       }
     }
 
+    const updates = {}
+    if (time !== undefined) updates.time = time
+    if (quantity !== undefined) updates.quantity = quantity
+
     const { data, error } = await supabase
       .from('schedules')
-      .update({ time })
+      .update(updates)
       .eq('id', id)
       .select()
       .single()
