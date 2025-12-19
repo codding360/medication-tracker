@@ -126,7 +126,7 @@ export default async function (fastify, opts) {
           id: user.id,
           name: user.name,
           whatsapp_number: user.whatsapp_number,
-          timezone: user.timezone
+          timezone: process.env.CRON_TIMEZONE || 'UTC'
         },
         medications: instructions,
         generated_at: new Date().toISOString()

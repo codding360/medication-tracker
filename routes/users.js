@@ -36,16 +36,16 @@ export default async function (fastify, opts) {
 
   // Create user
   fastify.post('/', async (request, reply) => {
-    const { name, whatsapp_number, timezone } = request.body
+    const { name, whatsapp_number } = request.body
 
-    if (!name || !whatsapp_number || !timezone) {
-      reply.code(400).send({ error: 'Missing required fields: name, whatsapp_number, timezone' })
+    if (!name || !whatsapp_number) {
+      reply.code(400).send({ error: 'Missing required fields: name, whatsapp_number' })
       return
     }
 
     const { data, error } = await supabase
       .from('users')
-      .insert([{ name, whatsapp_number, timezone }])
+      .insert([{ name, whatsapp_number }])
       .select()
       .single()
 
@@ -60,12 +60,11 @@ export default async function (fastify, opts) {
   // Update user
   fastify.put('/:id', async (request, reply) => {
     const { id } = request.params
-    const { name, whatsapp_number, timezone } = request.body
+    const { name, whatsapp_number } = request.body
 
     const updates = {}
     if (name !== undefined) updates.name = name
     if (whatsapp_number !== undefined) updates.whatsapp_number = whatsapp_number
-    if (timezone !== undefined) updates.timezone = timezone
 
     const { data, error } = await supabase
       .from('users')

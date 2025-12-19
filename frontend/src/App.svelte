@@ -91,7 +91,7 @@
           <div>
             <strong>Активный пользователь:</strong> {$activeUser.name}
             <span style="color: var(--text-light); margin-left: 1rem;">
-              {$activeUser.whatsapp_number} • {$activeUser.timezone}
+              {$activeUser.whatsapp_number}
             </span>
           </div>
           <button class="btn btn-secondary btn-small" onclick={() => { 

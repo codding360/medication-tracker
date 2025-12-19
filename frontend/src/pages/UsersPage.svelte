@@ -11,21 +11,8 @@
 
   let formData = {
     name: '',
-    whatsapp_number: '',
-    timezone: 'UTC'
+    whatsapp_number: ''
   }
-
-  const timezones = [
-    'UTC',
-    'Asia/Kolkata',
-    'Asia/Bishkek',
-    'Europe/Moscow',
-    'Europe/London',
-    'America/New_York',
-    'America/Los_Angeles',
-    'Asia/Tokyo',
-    'Australia/Sydney'
-  ]
 
   onMount(() => {
     loadUsers()
@@ -47,8 +34,7 @@
     editingUser = null
     formData = {
       name: '',
-      whatsapp_number: '',
-      timezone: 'UTC'
+      whatsapp_number: ''
     }
     showModal = true
   }
@@ -57,8 +43,7 @@
     editingUser = user
     formData = {
       name: user.name,
-      whatsapp_number: user.whatsapp_number,
-      timezone: user.timezone
+      whatsapp_number: user.whatsapp_number
     }
     showModal = true
   }
@@ -130,7 +115,7 @@
               {/if}
             </div>
             <div style="color: var(--text-light); font-size: 0.875rem;">
-              📱 {user.whatsapp_number} • 🌍 {user.timezone}
+              📱 {user.whatsapp_number}
             </div>
           </div>
           <div class="list-item-actions">
@@ -193,15 +178,6 @@
             placeholder="+996509690790"
           />
           <small style="color: var(--text-light);">Формат: +[код страны][номер]</small>
-        </div>
-
-        <div class="input-group">
-          <label for="timezone">Часовой пояс *</label>
-          <select id="timezone" bind:value={formData.timezone} required>
-            {#each timezones as tz}
-              <option value={tz}>{tz}</option>
-            {/each}
-          </select>
         </div>
 
         <div class="modal-footer">

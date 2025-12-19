@@ -96,7 +96,7 @@ export default async function (fastify, opts) {
     return {
       user_id: userId,
       now: time,
-      timezone: user.timezone,
+      timezone: process.env.CRON_TIMEZONE || 'UTC',
       medications: filteredMedications
     }
   })

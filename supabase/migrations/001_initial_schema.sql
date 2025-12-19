@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS users (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
   whatsapp_number TEXT NOT NULL,
-  timezone TEXT NOT NULL DEFAULT 'UTC',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
