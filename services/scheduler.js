@@ -5,6 +5,7 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { sendWhatsAppMessage, formatMedicationReminder } from './notifications.js'
+import { DateTime } from 'luxon'
 import * as dotenv from 'dotenv'
 
 dotenv.config()
@@ -14,15 +15,20 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+const TIMEZONE = process.env.CRON_TIMEZONE || 'UTC'
+
 /**
  * Check and send medication reminders for current time
  */
 export async function checkMedicationReminders() {
   try {
-    const now = new Date()
-    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+    // Получаем текущее время в нужном часовом поясе
+    const now = DateTime.now().setZone(TIMEZONE)
+    const currentTime = now.toFormat('HH:mm')
+    const currentDate = now.toISODate() // YYYY-MM-DD
     
-    console.log(`\n🔔 Checking reminders for ${currentTime}...`)
+    console.log(`\n🔔 Checking reminders for ${currentTime} (${TIMEZONE})...`)
+    console.log(`   Date: ${now.toLocaleString(DateTime.DATETIME_FULL)}...`)
     
     // Get all schedules for current time
     const { data: schedules, error: schedError } = await supabase
@@ -109,7 +115,7 @@ async function processUserReminders(userId, schedules, time) {
     }
     
     // Filter medications based on cycles
-    const today = new Date()
+    const today = DateTime.now().setZone(TIMEZONE)
     const medicationsToRemind = []
     
     for (const schedule of schedules) {
@@ -120,8 +126,8 @@ async function processUserReminders(userId, schedules, time) {
       let cycleStatus = null
       
       if (cycle) {
-        const startDate = new Date(cycle.cycle_start)
-        const daysSinceStart = Math.floor((today - startDate) / (1000 * 60 * 60 * 24))
+        const startDate = DateTime.fromISO(cycle.cycle_start, { zone: TIMEZONE })
+        const daysSinceStart = Math.floor(today.diff(startDate, 'days').days)
         
         if (daysSinceStart >= 0) {
           const cycleLength = cycle.take_days + cycle.rest_days
@@ -202,8 +208,11 @@ async function processUserReminders(userId, schedules, time) {
  * Run initial check on startup
  */
 export function startScheduler() {
+  const now = DateTime.now().setZone(TIMEZONE)
+  
   console.log('🚀 Medication Reminder Scheduler started')
-  console.log(`Server time: ${new Date().toLocaleString('ru-RU')}`)
+  console.log(`Server time: ${now.toLocaleString(DateTime.DATETIME_FULL)}`)
+  console.log(`Timezone: ${TIMEZONE}`)
   console.log('Checking reminders every minute...\n')
   
   // Run initial check

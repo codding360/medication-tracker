@@ -1,9 +1,12 @@
+import { DateTime } from 'luxon'
+
 export default async function (fastify, opts) {
   const { supabase } = fastify
 
   // Get full medication instructions for a user
   fastify.get('/:userId', async (request, reply) => {
     const { userId } = request.params
+    const TIMEZONE = process.env.CRON_TIMEZONE || 'UTC'
 
     try {
       // Get user info
@@ -69,9 +72,9 @@ export default async function (fastify, opts) {
         // Calculate cycle status
         let cycleStatus = null
         if (medCycle && medCycle.enabled) {
-          const today = new Date()
-          const startDate = new Date(medCycle.cycle_start)
-          const daysSinceStart = Math.floor((today - startDate) / (1000 * 60 * 60 * 24))
+          const today = DateTime.now().setZone(TIMEZONE)
+          const startDate = DateTime.fromISO(medCycle.cycle_start, { zone: TIMEZONE })
+          const daysSinceStart = Math.floor(today.diff(startDate, 'days').days)
           
           if (daysSinceStart >= 0) {
             const cycleLength = medCycle.take_days + medCycle.rest_days
